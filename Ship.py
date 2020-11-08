@@ -8,22 +8,33 @@ class AbstractShip:
 	code = ''
 
 	def __init__(self, start, end):
+		self.points = []
 		self.__set_points(start, end)
 		self.is_sunk = False
 
 	# This can obviously be done with some lin_alg
-	def does_point_intersect(self, target):
+	# def does_point_intersect(self, target):
+	# 	for point in self.points:
+	# 		if point.x == target.x and point.y == target.y:
+	# 			return True
+	# 	return False
+
+	# def does_ship_intersect(self, ship):
+	# 	for point in ship.points:
+	# 		if self.does_point_intersect(point):
+	# 			return True
+	# 	return False
+
+	def hit_ship(self, target):
+		total_points_hit = 0
 		for point in self.points:
-			if point.x == target.x and point.y == target.y:
-				return True
-		return False
-
-	def does_ship_intersect(self, ship):
-		for point in ship.points:
-			if self.does_point_intersect(point):
-				return True
-		return False
-
+			if target == point:
+				target.has_been_targeted = True
+			if point.has_been_targeted:
+				total_points_hit = total_points_hit + 1
+				if total_points_hit == len(self.points):
+					self.is_sunk = True
+	
 	# check size
 	# Must insert left to right or top to bottom
 	# Must not be diag
@@ -46,8 +57,6 @@ class AbstractShip:
 
 		if delta != self.size - 1:
 			raise PlacementError('Incorrect size. Place from left to right or top to bottom')
-
-		self.points = []
 
 		for i in range(self.size):
 			x = start.x

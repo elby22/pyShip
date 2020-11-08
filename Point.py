@@ -2,7 +2,7 @@ class Point:
 	def __init__(self, x, y):
 		self.x = x
 		self.y = y
-		self.is_hit = False
+		self.has_been_targeted = False
 		self.ship = None
 
 	def __str__(self):
@@ -10,6 +10,7 @@ class Point:
 
 	# def __hash__(self):
 	# 	return hash(self.__str__)
+
 
 	@staticmethod
 	def from_terminal():
@@ -20,4 +21,3 @@ class Point:
 
 		return Point(x, y)
 
-	

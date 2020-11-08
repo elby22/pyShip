@@ -19,24 +19,63 @@ class Game:
 		self.player_board = Board()
 		self.ai_board = Board()
 		self.Ship_Classes = [Destroyer, Submarine, Cruiser, Battleship, Carrier]
-
+		self.game_over = False
+		self.is_player_turn = True
+		self.first_turn = True
 
 	def start(self, generate_player_board):
-		if(generate_player_board):
-			self.place_random_ships(self.player_board)
-		else:
-			self.prompt_player_for_ships()
+		while not self.game_over:
+			if self.first_turn:
+				if(generate_player_board):
+					self.place_random_ships(self.player_board)
+				else:
+					self.prompt_player_for_ships()
 
-		self.clear_terminal()
-		print('Your board is set:')
-		Game.print_board(self.player_board, True)
+				Game.clear_terminal()
 
-		print('AI is placing ships: ')
-		self.place_random_ships(self.ai_board)
-		print('It\'s ready to play!')
+				print('Your board is set:')
+				Game.print_board(self.player_board, True)
+				print()
+				print('AI is placing ships: ')
+				
+				self.place_random_ships(self.ai_board)
+				print('It\'s ready to play!')
+				print()
+			else: 
+				Game.clear_terminal()
 
-	def clear_terminal(self):
-		print(chr(27) + "[2J")
+			if self.is_player_turn:
+				print('Opponent\'s Board')
+				Game.print_board(self.ai_board, False)
+				print()
+				print('Your Board')
+				Game.print_board(self.player_board, True)
+				print(str.format('Your turn: ({})', len(self.ai_board.moves) + 1))
+				
+				move = None
+				while not move:
+					try:
+						target = Game.propt_for_point('Enter your target')
+						move = self.ai_board.place_shot(target.x, target.y)
+					except PlacementError as error: 
+						Game.print_error(str(error))
+
+				if move.is_hit:
+					print('Hit!')
+					if move.is_sink:
+						print(str.format('You sunk your opponent\'s {}!', move.point.ship.name))
+					if move.is_win:
+						print('You won! Game over.')
+						self.game_over = True
+				else:
+					print('Miss!')
+
+				self.is_player_turn = False
+			else:
+				self.is_player_turn = True
+			
+			self.first_turn = False
+
 
 	def prompt_player_for_ships(self):
 		print('Place your ships:')
@@ -57,9 +96,14 @@ class Game:
 					self.player_board.place_ship(new_ship)
 					is_valid = True
 
-					self.clear_terminal()
+					Game.clear_terminal()
 				except PlacementError as error: 
 					Game.print_error(str(error))
+
+
+	@staticmethod
+	def clear_terminal():
+		print(chr(27) + "[2J")
 
 	@staticmethod
 	def is_point_valid(point):
@@ -88,8 +132,8 @@ class Game:
 				point = board.grid[x][y]
 				cell = None
 			
-				if point.is_hit == True:
-					if point.ship and show_ships:
+				if point.has_been_targeted == True:
+					if point.ship:
 						cell = 'X'
 					else:
 						cell = '.'
@@ -122,3 +166,6 @@ class Game:
 		for Ship_Class in self.Ship_Classes:
 			new_ship = Ship_Class.get_random_ship(board)
 			board.place_ship(new_ship)
+
+	# def take_random_shot(self, board):
+		
