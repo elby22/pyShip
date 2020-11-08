@@ -18,16 +18,30 @@ class Game:
 	def __init__(self):
 		self.player_board = Board()
 		self.ai_board = Board()
+		self.Ship_Classes = [Destroyer, Submarine, Cruiser, Battleship, Carrier]
 
-	def start(self):
-		self.prompt_player_for_ships()
+
+	def start(self, generate_player_board):
+		if(generate_player_board):
+			self.place_random_ships(self.player_board)
+		else:
+			self.prompt_player_for_ships()
+
+		self.clear_terminal()
+		print('Your board is set:')
+		Game.print_board(self.player_board, True)
+
+		print('AI is placing ships: ')
+		self.place_random_ships(self.ai_board)
+		print('It\'s ready to play!')
+
+	def clear_terminal(self):
+		print(chr(27) + "[2J")
 
 	def prompt_player_for_ships(self):
-		ship_classes = [Destroyer, Submarine, Cruiser, Battleship, Carrier]
-
 		print('Place your ships:')
 
-		for Ship_Class in ship_classes:
+		for Ship_Class in self.Ship_Classes:
 			is_valid = False
 			
 			while not is_valid:
@@ -42,9 +56,10 @@ class Game:
 					new_ship = Ship_Class(start, end)
 					self.player_board.place_ship(new_ship)
 					is_valid = True
+
+					self.clear_terminal()
 				except PlacementError as error: 
 					Game.print_error(str(error))
-
 
 	@staticmethod
 	def is_point_valid(point):
@@ -102,3 +117,8 @@ class Game:
 				Game.print_error('Point component must be integer')
 			except IndexError: 
 				Game.print_error('Where is your comma?')
+
+	def place_random_ships(self, board):
+		for Ship_Class in self.Ship_Classes:
+			new_ship = Ship_Class.get_random_ship(board)
+			board.place_ship(new_ship)
