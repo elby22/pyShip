@@ -2,6 +2,8 @@ from Board import Board
 from Ship import Destroyer, Submarine, Cruiser, Battleship, Carrier 
 from Point import Point
 from Exceptions import PlacementError
+import random
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -37,45 +39,63 @@ class Game:
 				Game.print_board(self.player_board, True)
 				print()
 				print('AI is placing ships: ')
-				
+
 				self.place_random_ships(self.ai_board)
 				print('It\'s ready to play!')
 				print()
-			else: 
-				Game.clear_terminal()
 
 			if self.is_player_turn:
-				print('Opponent\'s Board')
-				Game.print_board(self.ai_board, False)
-				print()
-				print('Your Board')
-				Game.print_board(self.player_board, True)
-				print(str.format('Your turn: ({})', len(self.ai_board.moves) + 1))
 				
-				move = None
-				while not move:
-					try:
-						target = Game.propt_for_point('Enter your target')
-						move = self.ai_board.place_shot(target.x, target.y)
-					except PlacementError as error: 
-						Game.print_error(str(error))
-
+				move = self.start_player_turn()
 				if move.is_hit:
-					print('Hit!')
+					print('You hit a target')
 					if move.is_sink:
 						print(str.format('You sunk your opponent\'s {}!', move.point.ship.name))
 					if move.is_win:
 						print('You won! Game over.')
 						self.game_over = True
 				else:
-					print('Miss!')
-
-				self.is_player_turn = False
+					print('You missed')
 			else:
-				self.is_player_turn = True
-			
+				move = self.start_ai_turn()
+				if move.is_hit:
+					print('AI hit a target')
+					if move.is_sink:
+						print(str.format('AI sunk your {}!', move.point.ship.name))
+					if move.is_win:
+						print('You lost! Game over.')
+						self.game_over = True
+				else:
+					print('AI Missed')
+
+
+			self.is_player_turn = not self.is_player_turn
 			self.first_turn = False
 
+	def start_player_turn(self):
+		print('Opponent\'s Board')
+		Game.print_board(self.ai_board, False)
+		print()
+		print('Your Board')
+		Game.print_board(self.player_board, True)
+		print(str.format('Your turn: ({})', len(self.ai_board.moves) + 1))
+		
+		move = None
+		while not move:
+			try:
+				target = Game.propt_for_point('Enter your target')
+				move = self.ai_board.place_shot(target.x, target.y)
+			except PlacementError as error: 
+				Game.print_error(str(error))
+		
+		return move
+
+	def start_ai_turn(self):
+		# Use alternate players moves
+		valid_targets = self.player_board.grid_map.difference(self.player_board.target_map)
+		target = random.sample(valid_targets, 1)[0]
+		move = self.player_board.place_shot(target.x, target.y)
+		return move
 
 	def prompt_player_for_ships(self):
 		print('Place your ships:')

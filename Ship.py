@@ -12,19 +12,6 @@ class AbstractShip:
 		self.__set_points(start, end)
 		self.is_sunk = False
 
-	# This can obviously be done with some lin_alg
-	# def does_point_intersect(self, target):
-	# 	for point in self.points:
-	# 		if point.x == target.x and point.y == target.y:
-	# 			return True
-	# 	return False
-
-	# def does_ship_intersect(self, ship):
-	# 	for point in ship.points:
-	# 		if self.does_point_intersect(point):
-	# 			return True
-	# 	return False
-
 	def hit_ship(self, target):
 		total_points_hit = 0
 		for point in self.points:

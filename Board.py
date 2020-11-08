@@ -6,7 +6,7 @@ class Board:
 		self.moves = []
 		self.target_map = set()
 		self.grid = None
-		self.grit_map = None
+		self.grid_map = None
 		self.__init_grid()
 		
 
